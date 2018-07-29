@@ -44,6 +44,12 @@
   version = "v1.8.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/mailru/easyjson"
+  packages = [".","buffer","jlexer","jwriter"]
+  revision = "d5012789d6659eeed305f54c1b1542e7b65829e6"
+
+[[projects]]
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
@@ -62,10 +68,22 @@
   revision = "f15292f7a699fcc1a38a80977f80a046874ba8ac"
 
 [[projects]]
+  name = "github.com/olivere/elastic"
+  packages = [".","config","uritemplates"]
+  revision = "e1da71ef4bb6941f2051f5cc1c4d3e56b1978cf3"
+  version = "v6.1.26"
+
+[[projects]]
   name = "github.com/pelletier/go-toml"
   packages = ["."]
   revision = "c01d1270ff3e442a8a57cddc1c92dc1138598194"
   version = "v1.2.0"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -154,6 +172,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "971ee627c3abe972c0c44fd5208e94ae080a29499642ee003990f15d6220e02f"
+  inputs-digest = "0d45f01f6159cfb6a27c6bfe5e09e961602ceb71bce240c425f13378259c2428"
   solver-name = "gps-cdcl"
   solver-version = 1
