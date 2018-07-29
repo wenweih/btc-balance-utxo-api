@@ -34,7 +34,7 @@ func init() {
 func (conf *configure) InitConfig() {
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(HomeDir())
-	viper.SetConfigName("bitcoin-service")
+	viper.SetConfigName("bitcoin-service-external-api")
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
@@ -42,7 +42,7 @@ func (conf *configure) InitConfig() {
 	if err == nil {
 		fmt.Println("Using Configure file:", viper.ConfigFileUsed())
 	} else {
-		log.Fatal("Error: bitcoin.yml not found in: ", HomeDir())
+		log.Fatal("Error: bitcoin-service-external-api not found in: ", HomeDir())
 	}
 
 	for key, value := range viper.AllSettings() {

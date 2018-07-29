@@ -1,6 +1,9 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+)
 
 var (
 	config *configure
@@ -8,6 +11,10 @@ var (
 
 func main() {
 	Execute()
+
+	sugar := zap.NewExample().Sugar()
+	defer sugar.Sync()
+	sugar.Info("Dump block")
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
