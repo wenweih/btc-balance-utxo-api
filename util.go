@@ -1,18 +1,28 @@
 package main
 
 import (
-	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/olivere/elastic"
 )
 
+type elasticClientAlias struct {
+	*elastic.Client
+}
+
+// Balance type struct
+type Balance struct {
+	Address string  `json:"address"`
+	Amount  float64 `json:"amount"`
+}
+
 // HomeDir 获取服务器当前用户目录路径
 func HomeDir() string {
 	home, err := homedir.Dir()
 	if err != nil {
-		log.Fatal(err.Error())
+		sugar.Fatal("Home Dir error:", err.Error())
 	}
 	return home
 }
@@ -21,7 +31,7 @@ func HomeDir() string {
 func noRouteMiddleware(ginInstance *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ginInstance.NoRoute(func(c *gin.Context) {
-			c.JSON(404, gin.H{"code": 404, "message": "Route Error"})
+			c.AbortWithStatusJSON(http.StatusNotFound, map[string]string{"message": "Route Error"})
 		})
 	}
 }
@@ -39,13 +49,9 @@ func ginEngine() *gin.Engine {
 
 func ginResponseException(c *gin.Context, code int, err error) {
 	c.JSON(code, gin.H{
-		"status": code,
-		"error":  err.Error(),
+		"status":  code,
+		"message": err.Error(),
 	})
-}
-
-type elasticClientAlias struct {
-	*elastic.Client
 }
 
 func (conf configure) elasticClient() (*elasticClientAlias, error) {

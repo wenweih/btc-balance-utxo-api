@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 type configure struct {
@@ -22,7 +20,7 @@ var rootCmd = &cobra.Command{
 // Execute 命令行入口
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatalf(err.Error())
+		sugar.Fatal("command exec error:", err.Error())
 	}
 }
 
@@ -32,6 +30,8 @@ func init() {
 }
 
 func (conf *configure) InitConfig() {
+	sugar = zap.NewExample().Sugar()
+	defer sugar.Sync()
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(HomeDir())
 	viper.SetConfigName("bitcoin-service-external-api")
@@ -40,9 +40,9 @@ func (conf *configure) InitConfig() {
 	// If a config file is found, read it in.
 	err := viper.ReadInConfig()
 	if err == nil {
-		fmt.Println("Using Configure file:", viper.ConfigFileUsed())
+		sugar.Info("Using Configure file:", viper.ConfigFileUsed())
 	} else {
-		log.Fatal("Error: bitcoin-service-external-api not found in: ", HomeDir())
+		sugar.Fatal("Error: configure bitcoin-service-external-api.yml not found in:", HomeDir())
 	}
 
 	for key, value := range viper.AllSettings() {
@@ -51,7 +51,6 @@ func (conf *configure) InitConfig() {
 			conf.ElasticURL = value.(string)
 		case "elastic_sniff":
 			conf.ElasticSniff = value.(bool)
-
 		}
 	}
 }
