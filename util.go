@@ -18,6 +18,11 @@ type Balance struct {
 	Amount  float64 `json:"amount"`
 }
 
+type configure struct {
+	ElasticURL   string
+	ElasticSniff bool
+}
+
 // HomeDir 获取服务器当前用户目录路径
 func HomeDir() string {
 	home, err := homedir.Dir()

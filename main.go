@@ -11,6 +11,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/gin-gonic/gin"
 	"github.com/olivere/elastic"
+	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
 
@@ -64,16 +65,42 @@ func balanceHandler(c *gin.Context) {
 }
 
 func main() {
-	sugar.Info("Dump block")
 	balanceEndPoint()
 }
 
 func init() {
+	config = new(configure)
 	sugar = zap.NewExample().Sugar()
 	defer sugar.Sync()
+	config.InitConfig()
 	c, err := config.elasticClient()
 	if err != nil {
 		sugar.Fatal("init es client error:", err.Error())
 	}
 	esClient = c
+
+}
+
+func (conf *configure) InitConfig() {
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(HomeDir())
+	viper.SetConfigName("bitcoin-service-external-api")
+	viper.AutomaticEnv() // read in environment variables that match
+
+	// If a config file is found, read it in.
+	err := viper.ReadInConfig()
+	if err == nil {
+		sugar.Info("Using Configure file:", viper.ConfigFileUsed())
+	} else {
+		sugar.Fatal("Error: configure bitcoin-service-external-api.yml not found in:", HomeDir())
+	}
+
+	for key, value := range viper.AllSettings() {
+		switch key {
+		case "elastic_url":
+			conf.ElasticURL = value.(string)
+		case "elastic_sniff":
+			conf.ElasticSniff = value.(bool)
+		}
+	}
 }
