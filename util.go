@@ -33,6 +33,12 @@ type esVout struct {
 	Used         interface{} `json:"used"`
 }
 
+type utxo struct {
+	Txid      string  `json:"txid"`
+	Amount    float64 `json:"amount"`
+	VoutIndex uint32  `json:"voutindex"`
+}
+
 // HomeDir 获取服务器当前用户目录路径
 func HomeDir() string {
 	home, err := homedir.Dir()

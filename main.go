@@ -79,14 +79,14 @@ func utxosHandle(c *gin.Context) {
 		return
 	}
 
-	var utxos []*esVout
+	var utxos []*utxo
 	for _, vout := range searchResult.Hits.Hits {
 		newVout := new(esVout)
 		if err := json.Unmarshal(*vout.Source, newVout); err != nil {
 			ginResponseException(c, http.StatusBadRequest, errors.New(strings.Join([]string{"fail to unmarshal esvout", err.Error()}, " ")))
 			return
 		}
-		utxos = append(utxos, newVout)
+		utxos = append(utxos, &utxo{Txid: newVout.TxIDBelongTo, Amount: newVout.Value, VoutIndex: newVout.Voutindex})
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status":  http.StatusOK,
