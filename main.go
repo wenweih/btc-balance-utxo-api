@@ -64,9 +64,7 @@ func balanceHandler(c *gin.Context) {
 }
 
 func main() {
-	Execute()
 	sugar.Info("Dump block")
-
 	balanceEndPoint()
 }
 

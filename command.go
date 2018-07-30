@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -9,19 +8,6 @@ import (
 type configure struct {
 	ElasticURL   string
 	ElasticSniff bool
-}
-
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "bitcoin-service-external-api",
-	Short: "Bitcoin middleware for application",
-}
-
-// Execute 命令行入口
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		sugar.Fatal("command exec error:", err.Error())
-	}
 }
 
 func init() {
