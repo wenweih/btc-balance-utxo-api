@@ -21,23 +21,12 @@ var (
 	sugar    *zap.SugaredLogger
 )
 
-type balanceParams struct {
-	Address string `form:"address" json:"address"`
-}
-
-func balanceEndPoint() {
-	r := ginEngine()
-	r.GET("/balance/:address", balanceHandler)
-	if err := r.Run(":3000"); err != nil {
-		sugar.Fatal("Balance Error:", err.Error())
-	}
-}
-
 func balanceHandler(c *gin.Context) {
 	address := c.Param("address")
+	// https://github.com/btcsuite/btcutil/blob/master/address_test.go
 	_, err := btcutil.DecodeAddress(address, &chaincfg.MainNetParams)
 	if err != nil {
-		ginResponseException(c, http.StatusBadRequest, err)
+		ginResponseException(c, http.StatusBadRequest, errors.New(strings.Join([]string{"Address format error:", err.Error()}, " ")))
 		return
 	}
 
@@ -64,8 +53,55 @@ func balanceHandler(c *gin.Context) {
 	})
 }
 
+func utxosHandle(c *gin.Context) {
+	address := c.Param("address")
+	// https://github.com/btcsuite/btcutil/blob/master/address_test.go
+	_, err := btcutil.DecodeAddress(address, &chaincfg.MainNetParams)
+	if err != nil {
+		ginResponseException(c, http.StatusBadRequest, errors.New(strings.Join([]string{"Address format error:", err.Error()}, " ")))
+		return
+	}
+
+	// addresses is an array datatype
+	// https://www.elastic.co/guide/en/elasticsearch/reference/current/array.html
+
+	// exists Query
+	// https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html
+	//
+	// curl -H 'Content-Type: application/json' -XPOST http://47.75.159.52:9200/vout/vout/_search\?pretty\=true -d '
+	// {
+	//		"query": {"bool":{"must":{"term":{"addresses":"12cbQLTFMXRnSzktFkuoG3eHoMeFtpTu3S"}},"must_not":{"exists":{"field":"used"}}}}
+	// }'
+	q := elastic.NewBoolQuery().Must(elastic.NewTermQuery("addresses", address)).MustNot(elastic.NewExistsQuery("used"))
+	searchResult, err := esClient.Search().Index("vout").Type("vout").Query(q).SortBy(elastic.NewFieldSort("value").Asc()).Do(context.TODO())
+	if err != nil {
+		ginResponseException(c, http.StatusBadRequest, errors.New(strings.Join([]string{"Query utxo error:", err.Error()}, " ")))
+		return
+	}
+
+	var utxos []*esVout
+	for _, vout := range searchResult.Hits.Hits {
+		newVout := new(esVout)
+		if err := json.Unmarshal(*vout.Source, newVout); err != nil {
+			ginResponseException(c, http.StatusBadRequest, errors.New(strings.Join([]string{"fail to unmarshal esvout", err.Error()}, " ")))
+			return
+		}
+		utxos = append(utxos, newVout)
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  http.StatusOK,
+		"address": address,
+		"utxos":   utxos,
+	})
+}
+
 func main() {
-	balanceEndPoint()
+	r := ginEngine()
+	r.GET("/balance/:address", balanceHandler)
+	r.GET("/utxo/:address", utxosHandle)
+	if err := r.Run(":3000"); err != nil {
+		sugar.Fatal("New Router Error:", err.Error())
+	}
 }
 
 func init() {
@@ -78,7 +114,6 @@ func init() {
 		sugar.Fatal("init es client error:", err.Error())
 	}
 	esClient = c
-
 }
 
 func (conf *configure) InitConfig() {

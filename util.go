@@ -23,6 +23,16 @@ type configure struct {
 	ElasticSniff bool
 }
 
+// esVout type struct
+type esVout struct {
+	TxIDBelongTo string      `json:"txidbelongto"`
+	Value        float64     `json:"value"`
+	Voutindex    uint32      `json:"voutindex"`
+	Coinbase     bool        `json:"coinbase"`
+	Addresses    []string    `json:"addresses"`
+	Used         interface{} `json:"used"`
+}
+
 // HomeDir 获取服务器当前用户目录路径
 func HomeDir() string {
 	home, err := homedir.Dir()
