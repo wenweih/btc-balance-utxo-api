@@ -1,0 +1,2 @@
+elastic_url: "http://host:port"
+elastic_sniff: false
